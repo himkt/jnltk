@@ -1,4 +1,3 @@
-import itertools
 import re
 
 
@@ -52,17 +51,50 @@ class SimpleRuleSntenceTokenizer(object):
             sentences (list<str>): a list of sentences
         """
 
-        target_bracket = { rbracket: lbracket for rbracket, lbracket in self.brackets }
+        delimiter2placeholder = {}
+        placeholder2delimiter = {}
+        placeholder_stem = '<neos_{}>'
 
-        print(target_bracket)
+        for idx, delimiter in enumerate(self.delimiters):
+            _placeholder = placeholder_stem.format(idx)
 
-        in_bracket = False
+            delimiter2placeholder[delimiter] = _placeholder
+            placeholder2delimiter[_placeholder] = delimiter
+
+
+        for lbracket, rbracket in self.brackets:
+            query_string = r'{}(.*?){}'.format(lbracket, rbracket)
+
+            for res in re.finditer(query_string, text):
+                from_pattern = res.group(0)
+                target_pattern = res.group(0)
+
+                for delimiter in self.delimiters:
+                    target_pattern = re.sub('\{}'.format(delimiter), delimiter2placeholder[delimiter], target_pattern)
+
+                # add 'PLACEHOLDER<del>
+                text = re.sub(from_pattern, target_pattern, text)
+
+        query_string = '(' +  '|'.join('\{}'.format(delimiter) for delimiter in self.delimiters) + ')'
+        text = re.sub(query_string, r'\1<delimiter>', text)
+
+        for placeholder, delimiter in placeholder2delimiter.items():
+            text = re.sub(placeholder, delimiter, text)
+
+        sentences = text.split('<delimiter>')
+
+        print(sentences)
+        return sentences[:-1]
 
 
 
 
 
 if __name__ == '__main__':
-    text = '「君の名は。」という映画がある。めっちゃ良い。'
     sentence_tokenizer = SimpleRuleSntenceTokenizer()
+    text = '「君の名は。」や「風立ちぬ。」という映画がある。めっちゃ良い。'
+    sentence_tokenizer.tokenize(text)
+    text = ''
+    sentence_tokenizer.tokenize(text)
+    text = '「君の名は。〉って壊れた文字列が与えられた。どうなる？'
     sentence_tokenizer.tokenize(text)
