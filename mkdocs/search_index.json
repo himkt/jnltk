@@ -1,0 +1,24 @@
+{
+    "docs": [
+        {
+            "location": "/",
+            "text": "JNLTK\n\n\nJNLTK is the library for Natural Language Processing for Japanese\n\n\nInstall\n\n\npip install jnltk",
+            "title": "Home"
+        },
+        {
+            "location": "/#jnltk",
+            "text": "JNLTK is the library for Natural Language Processing for Japanese",
+            "title": "JNLTK"
+        },
+        {
+            "location": "/#install",
+            "text": "pip install jnltk",
+            "title": "Install"
+        },
+        {
+            "location": "/tokenize/",
+            "text": "",
+            "title": "Tokenize"
+        }
+    ]
+}
