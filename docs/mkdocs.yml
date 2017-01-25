@@ -1,0 +1,10 @@
+site_name: JNLTK Documentation
+theme: readthedocs
+docs_dir: jnltk
+site_description: 'Documentation for JNLTK, the Python Natural Language Processing toolkit for Japanese'
+
+dev_addr: '0.0.0.0:8000'
+
+pages:
+- Home: index.md
+- Tokenize: tokenize/index.md
