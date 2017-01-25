@@ -9,5 +9,4 @@ setup(
     url = 'https://github.com/himkt/jnltk',
 
     packages = find_packages(),
-    test_suite = 'tests',
 )
