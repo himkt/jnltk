@@ -78,23 +78,13 @@ class SimpleRuleSntenceTokenizer(object):
         query_string = '(' +  '|'.join('\{}'.format(delimiter) for delimiter in self.delimiters) + ')'
         text = re.sub(query_string, r'\1<delimiter>', text)
 
-        for placeholder, delimiter in placeholder2delimiter.items():
-            text = re.sub(placeholder, delimiter, text)
+        for _placeholder, _delimiter in placeholder2delimiter.items():
+            text = re.sub(_placeholder, _delimiter, text)
 
         sentences = text.split('<delimiter>')
 
-        print(sentences)
-        return sentences[:-1]
+        if sentences[-1] == '':
+            return sentences[:-1]
 
-
-
-
-
-if __name__ == '__main__':
-    sentence_tokenizer = SimpleRuleSntenceTokenizer()
-    text = '「君の名は。」や「風立ちぬ。」という映画がある。めっちゃ良い。'
-    sentence_tokenizer.tokenize(text)
-    text = ''
-    sentence_tokenizer.tokenize(text)
-    text = '「君の名は。〉って壊れた文字列が与えられた。どうなる？'
-    sentence_tokenizer.tokenize(text)
+        else:
+            return sentences
