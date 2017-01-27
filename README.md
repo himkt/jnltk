@@ -1,4 +1,4 @@
-# Crawler for Wikipedia
+# Tools for Japanese Wikipedia dump
 
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/himkt/wikipedia_crawler.svg)](https://github.com/himkt/wikipedia_crawler/issues) [![GitHub stars](https://img.shields.io/github/stars/himkt/wikipedia_crawler.svg)](https://github.com/himkt/wikipedia_crawler/stargazers)
