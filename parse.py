@@ -40,15 +40,17 @@ class Parser(object):
     parser for Wikipedia dump data
     """
 
-    def __init__(self, enable_remove_internal_link=True, enable_remove_external_link=True,\
-            enable_remove_emphasis=True, ignore_template=True, enable_clean_title=True,\
-            ignore_heading=True, ignore_listing=True):
+    def __init__(self,\
+            enable_remove_internal_link=True, enable_remove_external_link=True,\
+            enable_remove_emphasis=True, enable_clean_title=True,\
+            ignore_category=True, ignore_template=True, ignore_heading=True, ignore_listing=True):
 
         self.enable_remove_internal_link = enable_remove_internal_link
         self.enable_remove_external_link = enable_remove_external_link
         self.enable_remove_emphasis = enable_remove_emphasis
 
         self.enable_clean_title = enable_clean_title
+        self.ignore_category    = ignore_category
         self.ignore_heading     = ignore_heading
         self.ignore_listing     = ignore_listing
         self.ignore_template    = ignore_template
@@ -76,16 +78,20 @@ class Parser(object):
         for line in page.split('\n'):
 
             if line.startswith('='):
-                if not self.ignore_heading:
-                    elements.append(line)
+                if self.ignore_heading:
+                    line = ''
 
             elif line.startswith('*') or line.startswith('#'):
-                if not self.ignore_listing:
-                    elements.append(line)
+                if self.ignore_listing:
+                    line = ''
 
             elif line.startswith('{{'):
-                if not self.enable_remove_internal_link:
-                    elements.append(line)
+                if self.enable_remove_internal_link:
+                    line = ''
+
+            elif line.startswith('[[Category:'):
+                if self.ignore_category:
+                    line = ''
 
             else:
                 if self.enable_remove_internal_link:
@@ -94,7 +100,7 @@ class Parser(object):
                 if self.enable_remove_emphasis:
                     line = remove_emphasis(line)
 
-                elements.append(line)
+            elements.append(line)
 
         return '\n'.join(filter(None, elements))
 
