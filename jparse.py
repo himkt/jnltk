@@ -35,7 +35,7 @@ def extract_categories(page):
 
 
 
-class Parser(object):
+class JParser(object):
     """
     parser for Wikipedia dump data
     """
@@ -131,8 +131,8 @@ class Parser(object):
 
 
 if __name__ == '__main__':
-    xmlf = '/data2/wikipedia_dump/20170105/jawiki-latest-pages-articles.xml'
-    parser = Parser()
+    xmlf = 'data/20170127/jawiki-latest-pages-articles.xml'
+    parser = JParser()
 
     for title, categories, page in parser.parse(xmlf):
         import time
