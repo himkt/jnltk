@@ -7,8 +7,17 @@ class Parser(object):
     parser for Wikipedia dump data
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, enable_remove_internal_link=True, enable_remove_external_link=True,\
+            enable_remove_template=True, enable_clean_title=True,\
+            ignore_heading=True, ignore_listing=True):
+
+        self.enable_remove_internal_link = enable_remove_internal_link
+        self.enable_remove_external_link = enable_remove_external_link
+        self.enable_remove_template      = enable_remove_template
+
+        self.enable_clean_title = enable_clean_title
+        self.ignore_heading     = ignore_heading
+        self.ignore_listing     = ignore_listing
 
 
     def __pages(self, xmlf):
@@ -27,6 +36,32 @@ class Parser(object):
                     yield title, text
 
 
+    def __preprocess(self, page):
+        elements = []
+
+        for line in page.split('\n'):
+
+            if line.startswith('='):
+                if not self.ignore_heading:
+                    elements.append(line)
+
+            elif line.startswith('*') or line.startswith('#'):
+                if not self.ignore_listing:
+                    elements.append(line)
+
+            elif line.startswith('{{'):
+                if not self.remove_internal_link:
+                    elements.append(line)
+
+            else:
+                if self.remove_internal_link:
+                    line = self.remove_internal_link(line)
+
+                elements.append(line)
+
+        return '\n'.join(filter(None, elements))
+
+
     def parse(self, xmlf):
         """
         cleaning title and text for each __parges elements
@@ -38,10 +73,24 @@ class Parser(object):
             if title.startswith('Wikipedia:') or \
                     title.startswith('Template:') or \
                     title.startswith('Category:') or \
+                    title.startswith('画像:') or \
                     title.startswith('ファイル:'):
                 continue
 
-            yield self.clean_title(title), self.extract_categories(page), self.demarkup(page)
+            categories = self.extract_categories(page)
+
+            if self.enable_clean_title:
+                title = self.clean_title(title)
+
+            page  = self.__preprocess(page)
+
+            yield title, categories, page
+
+
+    @staticmethod
+    def remove_internal_link(line):
+        pattern = r'\[\[(.*\|)?(.*)\]\]'
+        return re.sub(pattern, r'\2', line)
 
 
     @staticmethod
@@ -68,15 +117,12 @@ class Parser(object):
         return categories
 
 
-    @staticmethod
-    def demarkup(page):
-        return page
-
 
 if __name__ == '__main__':
     xmlf = '/data2/wikipedia_dump/20170105/jawiki-latest-pages-articles.xml'
     parser = Parser()
 
-    for title, categories, text in parser.parse(xmlf):
-        print(title)
-        print(categories)
+    for title, categories, page in parser.parse(xmlf):
+        import time
+        time.sleep(1)
+        print(page)
