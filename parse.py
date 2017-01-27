@@ -2,22 +2,56 @@ import re
 from lxml.etree import iterparse
 
 
+def remove_emphasis(line):
+    pattern = r'(\')+(.*?)(\')+'
+    return re.sub(pattern, r'\2', line)
+
+
+def remove_internal_link(line):
+    pattern = r'\[\[(.*\|)?(.*?)\]\]'
+    return re.sub(pattern, r'\2', line)
+
+
+def clean_title(title):
+    """
+    "aaa|bbb" -> "aaa"
+    """
+
+    return re.sub(r'\|.*', '', title)
+
+
+def extract_categories(page):
+    """
+    extract category from a page
+    """
+    categories = []
+    pattern = r'\A\[\[Category:(.*?)(\|.*)?\]\]\Z'
+
+    for line in page.split('\n'):
+        for category in re.finditer(pattern, line):
+            categories.append(category.group(1))
+
+    return categories
+
+
+
 class Parser(object):
     """
     parser for Wikipedia dump data
     """
 
     def __init__(self, enable_remove_internal_link=True, enable_remove_external_link=True,\
-            enable_remove_template=True, enable_clean_title=True,\
+            enable_remove_emphasis=True, ignore_template=True, enable_clean_title=True,\
             ignore_heading=True, ignore_listing=True):
 
         self.enable_remove_internal_link = enable_remove_internal_link
         self.enable_remove_external_link = enable_remove_external_link
-        self.enable_remove_template      = enable_remove_template
+        self.enable_remove_emphasis = enable_remove_emphasis
 
         self.enable_clean_title = enable_clean_title
         self.ignore_heading     = ignore_heading
         self.ignore_listing     = ignore_listing
+        self.ignore_template    = ignore_template
 
 
     def __pages(self, xmlf):
@@ -50,12 +84,15 @@ class Parser(object):
                     elements.append(line)
 
             elif line.startswith('{{'):
-                if not self.remove_internal_link:
+                if not self.enable_remove_internal_link:
                     elements.append(line)
 
             else:
-                if self.remove_internal_link:
-                    line = self.remove_internal_link(line)
+                if self.enable_remove_internal_link:
+                    line = remove_internal_link(line)
+
+                if self.enable_remove_emphasis:
+                    line = remove_emphasis(line)
 
                 elements.append(line)
 
@@ -77,45 +114,14 @@ class Parser(object):
                     title.startswith('ファイル:'):
                 continue
 
-            categories = self.extract_categories(page)
+            categories = extract_categories(page)
 
             if self.enable_clean_title:
-                title = self.clean_title(title)
+                title = clean_title(title)
 
             page  = self.__preprocess(page)
 
             yield title, categories, page
-
-
-    @staticmethod
-    def remove_internal_link(line):
-        pattern = r'\[\[(.*\|)?(.*)\]\]'
-        return re.sub(pattern, r'\2', line)
-
-
-    @staticmethod
-    def clean_title(title):
-        """
-        "aaa|bbb" -> "aaa"
-        """
-
-        return re.sub(r'\|.*', '', title)
-
-
-    @staticmethod
-    def extract_categories(page):
-        """
-        extract category from a page
-        """
-        categories = []
-        pattern = r'\A\[\[Category:(.*?)(\|.*)?\]\]\Z'
-
-        for line in page.split('\n'):
-            for category in re.finditer(pattern, line):
-                categories.append(category.group(1))
-
-        return categories
-
 
 
 if __name__ == '__main__':
